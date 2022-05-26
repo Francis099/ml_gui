@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import *
 import sys, pickle
 from PyQt5 import uic, QtWidgets ,QtCore, QtGui
 from data_visualise import data_
-
+from table_display import DataFrameModel
 
 class UI(QMainWindow):
   def __init__(self):
@@ -14,6 +14,7 @@ class UI(QMainWindow):
 
     self.Browse = self.findChild(QPushButton, "Browse")
     self.columns = self.findChild(QListWidget, "column_list")
+    self.table = self.findChild(QTableView, "tableView")
 
     self.Browse.clicked.connect(self.getCSV) # 버튼을 누르면 getCSV 이라는 함수를 호출
 
@@ -30,6 +31,12 @@ class UI(QMainWindow):
       stri = f'{j}------{str(self.df[j].dtype)}'
       # print(stri)
       self.columns.insertItem(i, stri)
+    
+    self.fill_combo_box()
+
+  def fill_combo_box(self):
+    x = DataFrameModel(self.df)
+    self.table.setModel(x)
 
   def getCSV(self):
     self.filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open file", "", "csv(*.csv)")
