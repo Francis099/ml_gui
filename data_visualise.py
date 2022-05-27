@@ -6,8 +6,6 @@ from sklearn.preprocessing import LabelEncoder,StandardScaler,MinMaxScaler,Power
 
 class data_:
 	
-	
-	
 	def read_file(self,filepath):
 		
 		return pd.read_csv(str(filepath))
@@ -41,7 +39,7 @@ class data_:
 
 	def fillna(self,df,column):
 		
-		df[column].fillna("Uknown",inplace=True)
+		df[column].fillna(0,inplace=True)
 		return df[column]
 
 	def fillmean(self,df,column):
