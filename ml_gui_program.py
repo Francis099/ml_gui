@@ -4,7 +4,7 @@ from PyQt5 import uic, QtWidgets ,QtCore, QtGui
 from data_visualise import data_
 from table_display import DataFrameModel
 from add_steps import add_steps
-
+import linear_rg
 
 class UI(QMainWindow):
   def __init__(self):
@@ -29,6 +29,22 @@ class UI(QMainWindow):
     self.empty_column = self.findChild(QComboBox, "empty_column")
     self.fillmean_btn = self.findChild(QPushButton, "fillmean")
     self.fillna_btn = self.findChild(QPushButton, "fillna")
+    # self.scaler = self.findChild(QComboBox, "scaler")
+    self.scale_btn = self.findChild(QPushButton, "scale_btn")
+    
+    self.scatter_X = self.findChild(QComboBox, "scatter_X")
+    self.scatter_Y = self.findChild(QComboBox, "scatter_Y")
+    self.scatter_c = self.findChild(QComboBox, "scatter_c")
+    self.scatter_mark = self.findChild(QComboBox, "scatter_mark")
+    self.scatterplot_btn = self.findChild(QPushButton, "scatter_show")
+
+    self.plot_X = self.findChild(QComboBox, "plot_X")
+    self.plot_Y = self.findChild(QComboBox, "plot_Y")
+    self.plot_c = self.findChild(QComboBox, "plot_c")
+    self.plot_mark = self.findChild(QComboBox, "plot_mark")
+    self.lineplot_btn = self.findChild(QPushButton, "line_show")
+    
+    self.train_btn = self.findChild(QPushButton, "train")
 
     self.Browse.clicked.connect(self.getCSV) # 버튼을 누르면 getCSV 이라는 함수를 호출
     self.columns.clicked.connect(self.target)
@@ -36,7 +52,45 @@ class UI(QMainWindow):
     self.convert_btn.clicked.connect(self.con_cat) 
     self.drop_btn.clicked.connect(self.dropc)
     self.fillmean_btn.clicked.connect(self.fill_mean) 
-    self.fillna_btn.clicked.connect(self.fill_na) 
+    self.fillna_btn.clicked.connect(self.fill_na)
+    self.scale_btn.clicked.connect(self.scale_value) 
+    self.scatterplot_btn.clicked.connect(self.scatter_plot)
+    self.lineplot_btn.clicked.connect(self.line_plot)
+
+    self.train_btn.clicked.connect(self.train_func)
+
+  def train_func(self):
+    myDict = {"Linear Regression" : linear_rg, }
+
+    if self.target_value != "":
+      self.win=myDict[self.model_select.currentText()].UI(self.df, self.target_value, steps)
+
+  def line_plot(self):
+    x=self.plot_X.currentText()
+    y=self.plot_Y.currentText()
+    c=self.plot_c.currentText()
+    marker=self.plot_mark.currentText()
+    data.line_plot(df=self.df, x=x, y=y, c=c, marker=marker)
+
+
+  def scatter_plot(self):
+    x=self.scatter_X.currentText()
+    y=self.scatter_Y.currentText()
+    c=self.scatter_c.currentText()
+    marker=self.scatter_mark.currentText()
+    data.scatter_plot(df=self.df, x=x, y=y, c=c, marker=marker)
+
+  def scale_value(self):
+    if self.scaler.currentText() == 'StandardScale':
+      self.df, func_name = data.StandardScale(self.df, self.target_value)
+    elif self.scaler.currentText() == 'MinMaxScale':
+      self.df, func_name = data.MinMaxScale(self.df, self.target_value)
+    else:
+      self.df, func_name = data.PowerScale(self.df, self.target_value)
+
+    steps.add_text(self.scaler.currentText()+" applied to data")
+    steps.add_pipeline(self.scaler.currentText(),func_name)
+    self.filldetails()
 
   def fill_mean(self):
     selected = self.df[self.empty_column.currentText()]
@@ -54,7 +108,7 @@ class UI(QMainWindow):
 
 
 
-  def filldetails(self, flag = 1):
+  def filldetails(self, flag = 1): # 처리 다 끝난것을 채워넣는 함수
     if flag == 0:
       self.df = data.read_file(str(self.filePath)) # data_visualise 에서 read_file함수 받아서 데이터프레임으로 받게 됨
 
@@ -64,7 +118,8 @@ class UI(QMainWindow):
 
     for i , j in enumerate(self.column_list):
       # print(i,j)
-      stri = f'{j}------{str(self.df[j].dtype)}'
+      stri = f'{j} ------ {str(self.df[j].dtype)}'
+      # stri = f'{j}'
       # print(stri)
       self.columns.insertItem(i, stri)
 
@@ -80,9 +135,18 @@ class UI(QMainWindow):
     self.empty_column.clear()
     self.empty_column.addItems(self.column_list)
 
+    self.scatter_X.clear()
+    self.scatter_X.addItems(self.column_list)
+    self.scatter_Y.clear()
+    self.scatter_Y.addItems(self.column_list)
+
+    self.plot_X.clear()
+    self.plot_X.addItems(self.column_list)
+    self.plot_Y.clear()
+    self.plot_Y.addItems(self.column_list)
+
     x = DataFrameModel(self.df)
     self.table.setModel(x)
-
 
 
   def getCSV(self):
@@ -97,7 +161,7 @@ class UI(QMainWindow):
 
   def set_target(self):
     self.target_value = str(self.item.text()).split()[0]
-    # print(self.target_value)
+    print(self.target_value)
     steps.add_code(f"target=data[{self.target_value}]")
     self.target_col.setText(self.target_value)
 
