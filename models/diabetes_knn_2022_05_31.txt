@@ -1,0 +1,6 @@
+
+Column Age dropped
+Column Insulin dropped
+Column BMI dropped
+Column DiabetesPedigreeFunction dropped
+MinMaxScale applied to data

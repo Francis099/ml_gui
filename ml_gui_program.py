@@ -4,7 +4,9 @@ from PyQt5 import uic, QtWidgets ,QtCore, QtGui
 from data_visualise import data_
 from table_display import DataFrameModel
 from add_steps import add_steps
-import linear_rg
+import linear_rg, logistic_reg, KNN
+import pre_trained
+
 
 class UI(QMainWindow):
   def __init__(self):
@@ -46,6 +48,10 @@ class UI(QMainWindow):
     
     self.train_btn = self.findChild(QPushButton, "train")
 
+    # pre-trained 자료 가져오기
+    self.pre_trained_btn = self.findChild(QPushButton, "pre_trained")
+    self.go_pre_trained_btn = self.findChild(QPushButton, "go_pre_trained")
+
     self.Browse.clicked.connect(self.getCSV) # 버튼을 누르면 getCSV 이라는 함수를 호출
     self.columns.clicked.connect(self.target)
     self.submit_btn.clicked.connect(self.set_target) 
@@ -59,8 +65,20 @@ class UI(QMainWindow):
 
     self.train_btn.clicked.connect(self.train_func)
 
+    self.pre_trained_btn.clicked.connect(self.upload_model)
+    self.go_pre_trained_btn.clicked.connect(self.test_pretrained)
+
+
+  def upload_model(self):
+    self.filePath_pre, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', './models/',"pkl(*.pkl)")
+    with open(self.filePath_pre, 'rb') as file:
+      self.pickle_model = pickle.load(file)
+        
+  def test_pretrained(self):
+    self.testing=pre_trained.UI(self.df,self.target_value,self.pickle_model,self.filePath_pre)
+
   def train_func(self):
-    myDict = {"Linear Regression" : linear_rg, }
+    myDict = {"Linear Regression" : linear_rg, "Logistic Regression" : logistic_reg, "kNN" : KNN}
 
     if self.target_value != "":
       self.win=myDict[self.model_select.currentText()].UI(self.df, self.target_value, steps)

@@ -1,0 +1,9 @@
+
+Column datetime dropped
+Column season dropped
+Column holiday dropped
+Column workingday dropped
+Column weather dropped
+Column windspeed dropped
+Column registered dropped
+Column casual dropped
